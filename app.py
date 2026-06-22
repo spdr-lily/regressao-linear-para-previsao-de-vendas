@@ -5,6 +5,8 @@ import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import subprocess
+import sys
 
 st.set_page_config(
     page_title="Previsão de Vendas com Regressão Linear",
@@ -16,8 +18,14 @@ st.set_page_config(
 def load_models():
     model_path = 'models/model_data.pkl'
     if not os.path.exists(model_path):
-        st.error("Modelos não encontrados. Execute `python train.py` primeiro.")
-        st.stop()
+        with st.spinner("Treinando modelos... Aguarde."):
+            result = subprocess.run(
+                [sys.executable, "train.py"],
+                capture_output=True, text=True
+            )
+            if result.returncode != 0:
+                st.error(f"Erro ao treinar modelos: {result.stderr}")
+                st.stop()
     with open(model_path, 'rb') as f:
         return pickle.load(f)
 
